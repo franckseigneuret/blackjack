@@ -15,6 +15,29 @@ const Ul = styled.ul`
   }
 `;
 
+const codeValueMapping = {
+  'ACE': 1, // ou 10
+  '2': 2,
+  '3': 3,
+  '4': 4,
+  '5': 5,
+  '6': 6,
+  '7': 7,
+  '8': 8,
+  '9': 9,
+  '10': 10,
+  'JACK': 10,
+  'QUEEN': 10,
+  'KING': 10,
+}
+
+const reducer = (accumulator, currentValue) => {
+  console.log('accumulator = ', accumulator)
+  console.log('currentValue = ', currentValue)
+  console.log('currentValue.value = ', currentValue.value)
+  return accumulator + codeValueMapping[currentValue.value]
+}
+
 function App() {
   const [isFirstnameDefined, setIsFirstnameDefined] = useState(false)
   const [firstname, setFirstname] = useState(null)
@@ -56,15 +79,23 @@ function App() {
     isFirstnameDefined && fetch(`https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=4`)
       .then((r) => r.json())
       .then(datas => {
+        const playerCards = datas.cards.slice(0, 2)
+        const bankCards = datas.cards.slice(2)
         const scoreTemp = { ...score }
         console.log('d=', datas.cards)
-        // fill 2 cards for player
-        scoreTemp.player.cards = datas.cards.slice(0, 2)
-        // fill 2 cards for bank
-        scoreTemp.bank.cards = datas.cards.slice(2)
+
+        scoreTemp.player.cards = playerCards
+        scoreTemp.player.total = playerCards.reduce(reducer, 0)
+        
+        scoreTemp.bank.cards = bankCards
+        scoreTemp.bank.total = bankCards.reduce(reducer, 0)
         setScore(scoreTemp)
       })
   }, [deckId])
+
+  // useEffect(() => {
+    
+  // }, [score])
 
   return (
     <div className="App">
@@ -90,6 +121,9 @@ function App() {
                   ))
                 }
               </Ul>
+              <p>
+                Total : {score.player.total}
+              </p>
             </div>
             <div>
               <p>Le jeu de la banque :</p>
@@ -100,6 +134,9 @@ function App() {
                   ))
                 }
               </Ul>
+              <p>
+                Total : {score.bank.total}
+              </p>
             </div>
           </Main>
           <p>deck_id : {deckId}</p>
