@@ -1,6 +1,19 @@
 import { useState, useEffect } from 'react'
+import styled from 'styled-components'
+
 
 import './App.css';
+const Main = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+`;
+const Ul = styled.ul`
+  display: flex;
+  list-style: none;
+  li img {
+    height: 150px;
+  }
+`;
 
 function App() {
   const [isFirstnameDefined, setIsFirstnameDefined] = useState(false)
@@ -63,37 +76,36 @@ function App() {
       }
 
       {
-        isFirstnameDefined && firstname && <>
-          <div>
-            <p>Bonjour {firstname}</p>
-            <p>deck_id : {deckId}</p>
-            <p>link : https://deckofcardsapi.com/api/deck/{deckId}/draw/?count=4</p>
+        isFirstnameDefined && firstname &&
+        <div>
+          <Main>
 
-            <p>Votre jeu :</p>
-            <ul>
-              {
-                score.player.cards && score.player.cards.map(c => (
-                  <li><img src={c.image} alt={c.code} /></li>
-                ))
-              }
-            </ul>
-          </div>
-          <div>
-            <p>Le jeu de la banque :</p>
-            <ul>
-              {
-                score.bank.cards && score.bank.cards.map(c => (
-                  <li><img src={c.image} alt={c.code} /></li>
-                ))
-              }
-            </ul>
-          </div>
-          
-        </>
+            <div>
+
+              <p>Votre jeu {firstname} :</p>
+              <Ul>
+                {
+                  score.player.cards && score.player.cards.map((c, k) => (
+                    <li key={k}><img src={c.image} alt={c.code} /></li>
+                  ))
+                }
+              </Ul>
+            </div>
+            <div>
+              <p>Le jeu de la banque :</p>
+              <Ul>
+                {
+                  score.bank.cards && score.bank.cards.map((c, k) => (
+                    <li key={k}><img src={c.image} alt={c.code} /></li>
+                  ))
+                }
+              </Ul>
+            </div>
+          </Main>
+          <p>deck_id : {deckId}</p>
+          <p>link : https://deckofcardsapi.com/api/deck/{deckId}/draw/?count=4</p>
+        </div>
       }
-
-
-
     </div>
   );
 }
