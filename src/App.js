@@ -93,9 +93,29 @@ function App() {
       })
   }, [deckId])
 
-  // useEffect(() => {
-    
-  // }, [score])
+  // ajoute une carte au jeu du player ou de la banque
+  const handleDraw = who => {
+    /**
+     * @TODO : bloquer les boutons, le temps du fetch + analyse retour (si pb 500 par exemple)
+     */
+    (who === 'player' || who === 'bank') && fetch(`https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=1`)
+      .then((r) => r.json())
+      .then(datas => {
+        const newCard = datas.cards[0]
+        const newHand = [...score[who].cards, newCard]
+
+        const scoreTemp = {
+          ...score,
+          [who]: {
+            ...score[who],
+            cards: newHand,
+            total: newHand.reduce(reducer, 0),
+          }
+        }
+        setScore(scoreTemp)
+      })
+  }
+  const handlePass = () => { }
 
   return (
     <div className="App">
@@ -124,6 +144,8 @@ function App() {
               <p>
                 Total : {score.player.total}
               </p>
+              <button onClick={() => handleDraw('player')}>Tirer</button>
+              <button onClick={handlePass}>Passer</button>
             </div>
             <div>
               <p>Le jeu de la banque :</p>
