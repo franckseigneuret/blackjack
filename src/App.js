@@ -3,14 +3,13 @@ import { useState, useEffect } from 'react'
 import './App.css';
 import {
   Main,
-  H1,
   Hand,
   Ul,
   DashedCircle,
 } from './AppStyles'
 
 const codeValueMapping = {
-  'ACE': 1, // ou 10
+  'ACE': 1, // ou 11
   '2': 2,
   '3': 3,
   '4': 4,
@@ -26,13 +25,25 @@ const codeValueMapping = {
 }
 
 const reducer = (accumulator, currentValue) => {
-  return accumulator + codeValueMapping[currentValue.value]
+  for (let i = 0; i < accumulator.length; i++) {
+    accumulator[i] += codeValueMapping[currentValue.value]
+  }
+  if (currentValue.value === 'ACE') {
+    let newCase = 0
+    for (let i = 0; i < accumulator.length; i++) {
+      newCase = accumulator[i] + 10 // 10 en plus cas l'AS vaut déjà 1 ==> 11
+    }
+    accumulator.push(newCase)
+  }
+
+  return accumulator
 }
 
 function App() {
   const [isFirstnameDefined, setIsFirstnameDefined] = useState(false)
-  const [firstname, setFirstname] = useState(null)
+  const [firstname, setFirstname] = useState('Franck')
   const [deckId, setDeckId] = useState(null)
+  const [buttonsVisible, setButtonsVisible] = useState(true)
   const [score, setScore] = useState({
     bank: {
       cards: [],
@@ -74,10 +85,10 @@ function App() {
         console.log('d=', datas.cards)
 
         scoreTemp.player.cards = playerCards
-        scoreTemp.player.total = playerCards.reduce(reducer, 0)
+        scoreTemp.player.total = playerCards.reduce(reducer, [0])
 
         scoreTemp.bank.cards = bankCards
-        scoreTemp.bank.total = bankCards.reduce(reducer, 0)
+        scoreTemp.bank.total = bankCards.reduce(reducer, [0])
         setScore(scoreTemp)
       })
   }, [deckId])
@@ -85,7 +96,7 @@ function App() {
   // ajoute une carte au jeu du player ou de la banque
   const handleDraw = who => {
     /**
-     * @TODO : bloquer les boutons, le temps du fetch + analyse retour (si pb 500 par exemple)
+     * @TODO : bloquer les boutons, le temps du fetch + analyse retour (si erreur 500 par exemple)
      */
     (who === 'player' || who === 'bank') && fetch(`https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=1`)
       .then((r) => r.json())
@@ -98,13 +109,21 @@ function App() {
           [who]: {
             ...score[who],
             cards: newHand,
-            total: newHand.reduce(reducer, 0),
+            total: newHand.reduce(reducer, [0]),
           }
         }
         setScore(scoreTemp)
       })
   }
-  const handlePass = () => { }
+  // le joueur passe son tour
+  const handlePass = () => {
+    setButtonsVisible(false)
+
+    // la banque démarre son tour et tire tant qu'il ne dépasse pas 17
+    if (score.bank.total < 17) {
+      handleDraw('bank')
+    }
+  }
 
   return (
     <div className="App">
@@ -113,7 +132,7 @@ function App() {
           <h1>Jouer au Blackjack</h1>
           <Main>
             <div>
-              <input type="text" name="firstname" onChange={handleName} />
+              <input type="text" name="firstname" onChange={handleName} value={firstname} />
               <button onClick={handleFirstnameDefined}>Entrez votre nom</button>
             </div>
           </Main>
@@ -135,10 +154,15 @@ function App() {
                 }
               </Ul>
               <p>
-                Total : {score.player.total}
+                Total : <ul>{score.player.total && score.player.total.map((sum)=>(
+                  <li style={sum > 21 ? {textDecoration: 'line-through'} : {fontWeight: 'bold'}}>{sum + ' '}</li>
+                ))}
+                </ul>
               </p>
-              <DashedCircle onClick={() => handleDraw('player')}>Tirer</DashedCircle>
-              <DashedCircle onClick={handlePass}>Passer</DashedCircle>
+              <div style={buttonsVisible ? { display: 'block' } : { display: 'none' }}>
+                <DashedCircle onClick={() => handleDraw('player')}>Tirer</DashedCircle>
+                <DashedCircle onClick={handlePass}>Passer</DashedCircle>
+              </div>
             </Hand>
 
             <Hand>

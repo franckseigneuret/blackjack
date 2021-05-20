@@ -8,9 +8,7 @@ const Main = styled.div`
   flex-wrap: wrap;
   text-align: left;
 `;
-const H1 = styled.h1`
-flex: 0 0 100%; 
-`;
+
 const Hand = styled.div`
   padding: 20px 50px;
   margin: 10px;
@@ -72,7 +70,6 @@ const DashedCircle = styled.button`
 
 export {
   Main,
-  H1,
   Hand,
   Ul,
   DashedCircle,
