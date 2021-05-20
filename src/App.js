@@ -1,19 +1,13 @@
 import { useState, useEffect } from 'react'
-import styled from 'styled-components'
-
 
 import './App.css';
-const Main = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-`;
-const Ul = styled.ul`
-  display: flex;
-  list-style: none;
-  li img {
-    height: 150px;
-  }
-`;
+import {
+  Main,
+  H1,
+  Hand,
+  Ul,
+  DashedCircle,
+} from './AppStyles'
 
 const codeValueMapping = {
   'ACE': 1, // ou 10
@@ -32,18 +26,13 @@ const codeValueMapping = {
 }
 
 const reducer = (accumulator, currentValue) => {
-  console.log('accumulator = ', accumulator)
-  console.log('currentValue = ', currentValue)
-  console.log('currentValue.value = ', currentValue.value)
   return accumulator + codeValueMapping[currentValue.value]
 }
 
 function App() {
   const [isFirstnameDefined, setIsFirstnameDefined] = useState(false)
   const [firstname, setFirstname] = useState(null)
-  const [part, setPart] = useState(null)
   const [deckId, setDeckId] = useState(null)
-  const [draw, setDraw] = useState(false)
   const [score, setScore] = useState({
     bank: {
       cards: [],
@@ -60,7 +49,7 @@ function App() {
   }
 
   const handleFirstnameDefined = (e) => {
-    setIsFirstnameDefined(true)
+    firstname && setIsFirstnameDefined(true)
   }
 
   useEffect(() => {
@@ -68,7 +57,7 @@ function App() {
     isFirstnameDefined && fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=6")
       .then((r) => r.json())
       .then(datas => {
-        setPart(datas)
+        fetch(`https://deckofcardsapi.com/api/deck/${datas.deck_id}/shuffle/`) // mélange des cartes du deck
         setDeckId(datas.deck_id)
       })
 
@@ -86,7 +75,7 @@ function App() {
 
         scoreTemp.player.cards = playerCards
         scoreTemp.player.total = playerCards.reduce(reducer, 0)
-        
+
         scoreTemp.bank.cards = bankCards
         scoreTemp.bank.total = bankCards.reduce(reducer, 0)
         setScore(scoreTemp)
@@ -121,8 +110,13 @@ function App() {
     <div className="App">
       {
         !isFirstnameDefined && <>
-          <input type="text" name="firstname" onChange={handleName} />
-          <button onClick={handleFirstnameDefined}>Votre nom</button>
+          <h1>Jouer au Blackjack</h1>
+          <Main>
+            <div>
+              <input type="text" name="firstname" onChange={handleName} />
+              <button onClick={handleFirstnameDefined}>Entrez votre nom</button>
+            </div>
+          </Main>
         </>
       }
 
@@ -131,8 +125,7 @@ function App() {
         <div>
           <Main>
 
-            <div>
-
+            <Hand>
               <p>Votre jeu {firstname} :</p>
               <Ul>
                 {
@@ -144,10 +137,11 @@ function App() {
               <p>
                 Total : {score.player.total}
               </p>
-              <button onClick={() => handleDraw('player')}>Tirer</button>
-              <button onClick={handlePass}>Passer</button>
-            </div>
-            <div>
+              <DashedCircle onClick={() => handleDraw('player')}>Tirer</DashedCircle>
+              <DashedCircle onClick={handlePass}>Passer</DashedCircle>
+            </Hand>
+
+            <Hand>
               <p>Le jeu de la banque :</p>
               <Ul>
                 {
@@ -159,10 +153,8 @@ function App() {
               <p>
                 Total : {score.bank.total}
               </p>
-            </div>
+            </Hand>
           </Main>
-          <p>deck_id : {deckId}</p>
-          <p>link : https://deckofcardsapi.com/api/deck/{deckId}/draw/?count=4</p>
         </div>
       }
     </div>
