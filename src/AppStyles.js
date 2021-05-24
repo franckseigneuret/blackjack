@@ -26,6 +26,7 @@ const Ul = styled.ul`
     height: 150px;
   }
 `;
+
 const DashedCircle = styled.button`
     position: relative;
     display: inline-block;
@@ -67,10 +68,31 @@ const DashedCircle = styled.button`
     content: '';
   }
 `
+const ScoreBullet = styled.ul`
+  list-style: none;
+
+  li {
+    display: inline-block;
+    background: white;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    border-radius: 50%;
+    text-align: center;
+    margin: 5px;
+    font-weight: bold;
+  }
+
+  li.wrong {
+    text-decoration: line-through;
+    color: red;
+  }
+`
 
 export {
   Main,
   Hand,
   Ul,
   DashedCircle,
+  ScoreBullet,
 }
