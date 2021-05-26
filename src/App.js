@@ -235,9 +235,15 @@ function App() {
         bestScoreBank === null
       )
     ) {
-      setWinner(`Bravo ${firstname}, vous avez gagné`)
+      setWinner(<>
+        <p>Bravo {firstname}, vous avez gagné</p>
+        <button onClick={() => { initialize(); loadFirstHands(); }}>Rejouer</button>
+      </>)
     } else {
-      setWinner('La banque gagné')
+      setWinner(<>
+        <p>La banque a gagné</p>
+        <button onClick={() => { initialize(); loadFirstHands(); }}>Rejouer</button>
+      </>)
     }
 
   }
@@ -267,7 +273,6 @@ function App() {
           {
             winner && <div>
               <p>{winner}</p>
-              <a href="">Relancer la page</a>
             </div>
           }
           <Main>
