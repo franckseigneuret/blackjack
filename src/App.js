@@ -46,50 +46,47 @@ const reducer = (accumulator, currentValue) => {
   return accumulator
 }
 
+const initialScore = {
+  bank: {
+    cards: [],
+    total: [0], // addition des valeurs des cartes. array car l'AS génère plusieurs possibilités de total
+  },
+  player: {
+    cards: [],
+    total: [0], // addition des valeurs des cartes. array car l'AS génère plusieurs possibilités de total
+  },
+}
+
 function App() {
-  const [isFirstnameDefined, setIsFirstnameDefined] = useState(false)
+  const [firstname, setFirstname] = useState('franck')
+  const [startPlay, setStartPlay] = useState(false)
   const [isGameStarted, setIsGameStarted] = useState(false)
   const [bankCanPlayAgain, setBankCanPlayAgain] = useState(false)
-  const [firstname, setFirstname] = useState('AA')
   const [problem, setProblem] = useState(null)
   const [deckId, setDeckId] = useState(null)
   const [buttonsVisible, setButtonsVisible] = useState(true)
   const [winner, setWinner] = useState(null)
-  const [score, setScore] = useState({
-    bank: {
-      cards: [],
-      total: [0], // addition des valeurs des cartes. array car l'AS génère plusieurs possibilités de total
-    },
-    player: {
-      cards: [],
-      total: [0], // addition des valeurs des cartes. array car l'AS génère plusieurs possibilités de total
-    },
-  })
+  const [score, setScore] = useState(initialScore)
 
-  const handleFirstnameDefined = (e) => {
-    firstname && setIsFirstnameDefined(true)
+
+  const initialize = () => {
+    setIsGameStarted(false)
+    setBankCanPlayAgain(false)
+    setProblem(null)
+    setButtonsVisible(true)
+    setWinner(null)
+    setScore(initialScore)
+  }
+  const goToPlay = () => {
+    firstname && setStartPlay(true)
   }
 
-  useEffect(() => {
-    // load du deck de 6 jeux de cartes
+  /**
+   * distribution des premières cartes (2 pour la bank et 2 pour le player)
+   */
+  const loadFirstHands = () => {
 
-    isFirstnameDefined && fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=6")
-      .then(r => r.json())
-      .then(datas => {
-        fetch(`https://deckofcardsapi.com/api/deck/${datas.deck_id}/shuffle/`) // mélange des cartes du deck
-        setDeckId(datas.deck_id)
-      })
-      .catch((error) => {
-        setProblem('Un pb est survenu (probablement erreur 500 du serveur deckofcardsapi)')
-        console.log('Request failed', error)
-      })
-
-  }, [isFirstnameDefined])
-
-  useEffect(() => {
-    // distribution des premières cartes (2 pour la bank et 2 pour le player)
-
-    isFirstnameDefined && fetch(`https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=4`)
+    fetch(`https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=4`)
       .then(r => r.json())
       .then(datas => {
         const playerCards = datas.cards.slice(0, 2)
@@ -104,9 +101,32 @@ function App() {
         setScore(scoreTemp)
       })
       .catch((error) => {
+        setProblem(<>
+          <p>Un pb est survenu (probablement erreur 500 du serveur deckofcardsapi)</p>
+          <button onClick={() => { initialize(); loadFirstHands(); }}>Réinitialiser</button>
+        </>)
+        console.log('Request failed', error)
+      })
+  }
+
+  useEffect(() => {
+    // si le startPlay vaut true ==> fetch le deck de 6 jeux de cartes
+    startPlay && fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=6")
+      .then(r => r.json())
+      .then(datas => {
+        fetch(`https://deckofcardsapi.com/api/deck/${datas.deck_id}/shuffle/`) // mélange des cartes du deck
+        setDeckId(datas.deck_id)
+      })
+      .catch((error) => {
         setProblem('Un pb est survenu (probablement erreur 500 du serveur deckofcardsapi)')
         console.log('Request failed', error)
       })
+
+  }, [startPlay])
+
+  useEffect(() => {
+
+    startPlay && loadFirstHands()
 
   }, [deckId]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -225,24 +245,23 @@ function App() {
   return (
     <div className="App">
       {
-        !isFirstnameDefined && <>
+        !startPlay && <>
           <h1>Jouer au Blackjack</h1>
           <Main>
             <div>
               <input type="text" name="firstname" onChange={e => setFirstname(e.currentTarget.value)} value={firstname} />
-              <button onClick={handleFirstnameDefined}>Entrez votre nom</button>
+              <button onClick={goToPlay}>Entrez votre nom</button>
             </div>
           </Main>
         </>
       }
 
       {
-        isFirstnameDefined && firstname &&
+        startPlay && firstname &&
         <div>
           {
             problem && <div>
-              <p>{problem}</p>
-              <a href="">Relancer la page</a>
+              {problem}
             </div>
           }
           {
