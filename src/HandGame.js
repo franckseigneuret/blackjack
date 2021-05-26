@@ -6,7 +6,7 @@ import {
 
 import Score from './Score'
 
-const HandGame = ({ score, who, title, handleDraw, handlePass, buttonsVisible }) => (
+const HandGame = ({ score, who, title, handleDraw, handlePass, buttonsVisible, bankCanPlayAgain }) => (
 
   <Hand>
     <p>{title}</p>
@@ -21,11 +21,17 @@ const HandGame = ({ score, who, title, handleDraw, handlePass, buttonsVisible })
       Total : <Score whoseScore={score[who]} />
     </div>
     {
-      who !== 'bank' &&
+      who === 'bank' ?
+      
+      <div style={bankCanPlayAgain ? { display: 'block', color: 'red' } : { display: 'none' }}>
+        La banque joue
+      </div>
+      :
       <div style={buttonsVisible ? { display: 'block' } : { display: 'none' }}>
         <DashedCircle onClick={() => handleDraw('player')}>Tirer</DashedCircle>
         <DashedCircle onClick={() => handlePass()}>Passer</DashedCircle>
       </div>
+
     }
   </Hand>
 )

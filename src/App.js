@@ -120,10 +120,6 @@ function App() {
     }
 
     if (bankCanPlayAgain) {
-      /**
-       * @TODO ajout sablier pour indiquer à l'utilisateur que l'IA de la banque joue
-       */
-
       console.log('tour de la banque')
       console.log('score.bank.total.indexOf(21) = ', score.bank.total.indexOf(21))
 
@@ -209,6 +205,7 @@ function App() {
 
     console.log('getWinner from : ', from)
     setButtonsVisible(false)
+    setBankCanPlayAgain(false)
     const bestScorePlayer = getBestScore(score.player.total)
     const bestScoreBank = getBestScore(score.bank.total)
 
@@ -272,6 +269,7 @@ function App() {
               handleDraw={handleDraw}
               handlePass={handlePass}
               buttonsVisible={buttonsVisible}
+              bankCanPlayAgain={bankCanPlayAgain}
             />
 
           </Main>

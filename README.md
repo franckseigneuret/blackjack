@@ -19,11 +19,11 @@ Test technique YouSign
 - [ ] créer plus de composants
 - [ ] possibilité de Redux pour enregistrer les scores et les communiquer à chaque composant
 - [ ] possibilité le localStorage pour enregistrer les scores
-- [ ] revoir les styles et rendre plus propre en isolant tous les styles dans une page (malheureusement il y a un peu de style )
+- [ ] retirer styles inline +  isoler les styles dans une fichier
 - [ ] écrire les commentaires du code en anglais
 - [x] créer plus de composants React plutôt qu'un fichier App réunissant le tout
 - [ ] permettre le jeu à plusieurs
 - [ ] ajout un bouton pour réinitialiser la partie
 - [ ] enregistrer les parties en ligne (par exemple sur [MongoDB](https://www.mongodb.com), via [ExpressJS](https://expressjs.com))
 - [ ] propTypes
-- [ ] Test
+- [ ] TU
