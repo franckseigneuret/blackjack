@@ -48,7 +48,8 @@ const reducer = (accumulator, currentValue) => {
 
 function App() {
   const [isFirstnameDefined, setIsFirstnameDefined] = useState(false)
-  const [canBankPlayAgain, setCanBankPlayAgain] = useState(false)
+  const [isGameStarted, setIsGameStarted] = useState(false)
+  const [bankCanPlayAgain, setBankCanPlayAgain] = useState(false)
   const [firstname, setFirstname] = useState('AA')
   const [problem, setProblem] = useState(null)
   const [deckId, setDeckId] = useState(null)
@@ -82,12 +83,12 @@ function App() {
         setProblem('Un pb est survenu (probablement erreur 500 du serveur deckofcardsapi)')
         console.log('Request failed', error)
       })
-      
+
   }, [isFirstnameDefined])
 
   useEffect(() => {
     // distribution des premières cartes (2 pour la bank et 2 pour le player)
-    
+
     isFirstnameDefined && fetch(`https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=4`)
       .then(r => r.json())
       .then(datas => {
@@ -107,21 +108,38 @@ function App() {
         console.log('Request failed', error)
       })
 
-  }, [deckId])
+  }, [deckId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
 
-    if (canBankPlayAgain && Math.min(score.bank.total) < 17) {
+    if (isGameStarted && !bankCanPlayAgain) {
+      // si la banque a 21 dans son pannier de score => ignorer les autres valeurs de score et lanver getWinner
+      if (score.player.total.filter(el => el > 21).length === score.player.total.length) {
+        getWinner('player a dépassé 21')
+      }
+    }
+
+    if (bankCanPlayAgain) {
       /**
        * @TODO ajout sablier pour indiquer à l'utilisateur que l'IA de la banque joue
        */
-      setTimeout(() => handleDraw('bank'), 3000)
-    }
-    else if (canBankPlayAgain) {
-      getWinner()
+
+      console.log('tour de la banque')
+      console.log('score.bank.total.indexOf(21) = ', score.bank.total.indexOf(21))
+
+      if (score.bank.total.indexOf(21) !== -1) {
+        getWinner('score.bank.total.indexOf(21)')
+      }
+      else if (Math.min(...score.bank.total) < 17) {
+        console.log('banque rejoue')
+        setTimeout(() => handleDraw('bank'), 3000)
+      }
+      else {
+        getWinner('else')
+      }
     }
 
-  }, [canBankPlayAgain])
+  }, [isGameStarted, bankCanPlayAgain, score]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ajoute une carte au jeu du player ou de la banque, et set les Scores
   const handleDraw = who => {
@@ -144,13 +162,10 @@ function App() {
         }
 
         if (who === 'bank') {
-          setCanBankPlayAgain(true)
-        } else {
-          /**
-           * @TODO vérifier si le player ne dépasse pas 21. Si dépasserment, il perd
-           */
+          setBankCanPlayAgain(true)
         }
 
+        setIsGameStarted(true)
         setScore(scoreTemp)
       })
       .catch((error) => {
@@ -161,13 +176,11 @@ function App() {
 
   // le joueur passe son tour
   const handlePass = () => {
+    console.log('pass')
+    setIsGameStarted(true)
     setButtonsVisible(false)
 
-    // si la banque a moins de 17, elle rejoue. Sinon, le jeu s'arrete et on calcule qui gagne
-    Math.min(...score.bank.total) < 17 ?
-      handleDraw('bank')
-      :
-      getWinner()
+    setBankCanPlayAgain(true)
   }
 
   /**
@@ -181,7 +194,7 @@ function App() {
     // return arr.reduce((a, b) => (Math.abs(b - needle) < Math.abs(a - needle) ? b : a))
     let r = null
     for (let i = 0; i < arr.length; i++) {
-      if (arr[i] > r && arr[i] < needle) {
+      if (arr[i] > r && arr[i] <= needle) {
         r = arr[i]
       }
     }
@@ -192,8 +205,10 @@ function App() {
   /**
    * annonce le gagnant
    */
-  const getWinner = () => {
+  const getWinner = (from = '') => {
 
+    console.log('getWinner from : ', from)
+    setButtonsVisible(false)
     const bestScorePlayer = getBestScore(score.player.total)
     const bestScoreBank = getBestScore(score.bank.total)
 
