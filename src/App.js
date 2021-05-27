@@ -148,7 +148,7 @@ function App() {
       }
       else if (Math.min(...score.bank.total) < 17) {
         console.log('banque rejoue')
-        setTimeout(() => handleDraw('bank'), 3000)
+        setTimeout(() => handleDraw('bank'), 2000)
       }
       else {
         getWinner('else')
@@ -200,23 +200,14 @@ function App() {
   }
 
   /**
-   * Retourne le score le plus proche de 21 obtenu par un joueur
+   * Retourne le score le plus proche de 21 et inférieur ou égal à 21, obtenu par un joueur
    * @param {Array} arr
-   * @returns {Number} meilleur score
+   * @returns {Array} tableau avec le meilleur score
    */
-  const getBestScore = (arr) => {
+  const getClosest21Reducer = (acc, item) => Math.abs(item - 21) < Math.abs(acc - 21) ? item : acc
+  const getClosest21AvoidOver21Reducer = (acc, item) =>  item > 21 ? acc : getClosest21Reducer(acc, item)
+  const getBestScore = arr => arr.reduce(getClosest21AvoidOver21Reducer, [])
 
-    const needle = 21
-    // return arr.reduce((a, b) => (Math.abs(b - needle) < Math.abs(a - needle) ? b : a))
-    let r = null
-    for (let i = 0; i < arr.length; i++) {
-      if (arr[i] > r && arr[i] <= needle) {
-        r = arr[i]
-      }
-    }
-    return r
-
-  }
 
   /**
    * annonce le gagnant
@@ -272,7 +263,7 @@ function App() {
           }
           {
             winner && <div>
-              <p>{winner}</p>
+              {winner}
             </div>
           }
           <Main>
